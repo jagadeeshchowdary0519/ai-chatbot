@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VIET AI Chatbot</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: url("https://viet.edu.in/wp-content/uploads/2022/04/college-campus.jpg") no-repeat center center/cover;
+    }
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+    }
+    .chat-container {
+      position: relative;
+      width: 95%;
+      max-width: 450px;
+      height: 90%;
+      background: #fff;
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+      overflow: hidden;
+      z-index: 1;
+    }
+    .header {
+      background: #007bff;
+      color: white;
+      text-align: center;
+      padding: 12px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .chat-box {
+      flex: 1;
+      padding: 12px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: #f9f9f9;
+    }
+    .chat-message {
+      max-width: 80%;
+      padding: 10px 14px;
+      border-radius: 16px;
+      font-size: 14px;
+      line-height: 1.4;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      position: relative;
+    }
+    .chat-message.bot {
+      align-self: flex-start;
+      background: #eaeaea;
+    }
+    .chat-message.user {
+      align-self: flex-end;
+      background: #007bff;
+      color: white;
+    }
+    .timestamp {
+      font-size: 10px;
+      color: #555;
+      margin-top: 4px;
+      text-align: right;
+    }
+    .input-container {
+      display: flex;
+      padding: 10px;
+      border-top: 1px solid #ccc;
+      background: white;
+    }
+    input {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      outline: none;
+    }
+    button {
+      margin-left: 8px;
+      padding: 12px 18px;
+      background: #007bff;
+      color: black;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover { background: #0056b3; }
+    .quick-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 8px;
+      border-top: 1px solid #eee;
+      background: #fafafa;
+    }
+    .quick-buttons button {
+      flex: 1 1 auto;
+      padding: 8px;
+      background: #f1f1f1;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .quick-buttons button:hover {
+      background: #ddd;
+    }
+    .typing {
+      font-size: 13px;
+      color: #666;
+      font-style: italic;
+      margin-left: 6px;
+    }
+    .show-more {
+      color: blue;
+      cursor: pointer;
+      font-size: 12px;
+      display: inline-block;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay"></div>
+  <div class="chat-container">
+    <div class="header">🤖 VIET AI Chatbot</div>
+    <div class="chat-box" id="chat-box"></div>
+
+    <div class="quick-buttons">
+      <button onclick="sendQuick('Admissions at VIET')">Admissions</button>
+      <button onclick="sendQuick('Placements in VIET')">Placements</button>
+      <button onclick="sendQuick('Courses in VIET')">Courses</button>
+      <button onclick="sendQuick('Facilities at VIET')">Facilities</button>
+      <button onclick="sendQuick('Events in VIET')">Events</button>
+      <button onclick="sendQuick('Contact details of VIET')">Contact</button>
+    </div>
+
+    <div class="input-container">
+      <input type="text" id="user-input" placeholder="Type your question..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    function getTimestamp() {
+      return new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    }
+
+    function addMessage(text, sender) {
+      const chatBox = document.getElementById("chat-box");
+      const messageDiv = document.createElement("div");
+      messageDiv.className = "chat-message " + sender;
+
+      let displayText = text;
+      let needsToggle = false;
+
+      if (text.length > 150) {
+        displayText = text.substring(0, 150) + "...";
+        needsToggle = true;
+      }
+
+      const span = document.createElement("span");
+      span.innerText = displayText;
+      messageDiv.appendChild(span);
+
+      if (needsToggle) {
+        const toggle = document.createElement("div");
+        toggle.className = "show-more";
+        toggle.innerText = "Show more";
+        toggle.onclick = () => {
+          if (span.innerText.endsWith("...")) {
+            span.innerText = text;
+            toggle.innerText = "Show less";
+          } else {
+            span.innerText = text.substring(0, 150) + "...";
+            toggle.innerText = "Show more";
+          }
+        };
+        messageDiv.appendChild(toggle);
+      }
+
+      const time = document.createElement("div");
+      time.className = "timestamp";
+      time.innerText = getTimestamp();
+      messageDiv.appendChild(time);
+
+      chatBox.appendChild(messageDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function showTyping() {
+      const chatBox = document.getElementById("chat-box");
+      const typingDiv = document.createElement("div");
+      typingDiv.className = "chat-message bot";
+      typingDiv.id = "typing";
+      typingDiv.innerHTML = "<span class='typing'>Bot is typing...</span>";
+      chatBox.appendChild(typingDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function removeTyping() {
+      const typingDiv = document.getElementById("typing");
+      if (typingDiv) typingDiv.remove();
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById("user-input");
+      const text = input.value.trim();
+      if (!text) return;
+
+      addMessage(text, "user");
+      input.value = "";
+
+      showTyping();
+
+      try {
+        let res = await fetch("http://localhost:5000/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: text })
+        });
+        let data = await res.json();
+        removeTyping();
+        addMessage(data.reply, "bot");
+      } catch (e) {
+        removeTyping();
+        addMessage("⚠️ Server error. Please check backend.", "bot");
+      }
+    }
+
+    function sendQuick(text) {
+      document.getElementById("user-input").value = text;
+      sendMessage();
+    }
+
+    document.getElementById("user-input").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") sendMessage();
+    });
+
+    // Initial welcome message
+    window.onload = () => {
+      addMessage("Hello 👋 I am VIET AI Chatbot. Ask me anything!", "bot");
+    };
+  </script>
+</body>
+</html>
