@@ -228,7 +228,7 @@
       showTyping();
 
       try {
-        let res = await fetch("http://localhost:5000/chat", {
+        let res = await fetch(let res = await fetch("https://viet-ai-chatbot-backend.onrender.com/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message: text })
@@ -258,3 +258,4 @@
   </script>
 </body>
 </html>
+
